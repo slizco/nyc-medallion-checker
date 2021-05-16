@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+
+body {
+  background-image: url("statue_of_liberty.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+h1 {
+  color: goldenrod;
+  text-align: center;
+  font-family: verdana;
+}
+
+.titlediv {
+  background-color: midnightblue;
+  border: 4px outset darkgoldenrod;
+}
+
+input {
+  font-family: verdana;
+  width: 50%;
+}
+
+
+button {
+  color: goldenrod;
+  font-family: verdana;
+  width: 20%;
+}
+
+
+p {
+  font-family: verdana;
+  color: midnightblue;
+  background: white;
+  font-size: 20px;
+}
+
+.result {
+  font-family: verdana;
+  color: midnightblue;
+  background: white;
+  font-size: 30px;
+  width: 50%;
+  background: transparent;
+}
+
+.valid_result {
+  font-family: verdana;
+  color: darkgreen;
+  background: linear-gradient(white, lightgreen);
+  font-size: 20px;
+  width: 50%;
+}
+
+.invalid_result {
+  font-family: verdana;
+  color: firebrick;
+  background: linear-gradient(white, coral);
+  font-size: 20px;
+  width: 30%;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  color: darkgray;
+  text-align: center;
+  background: white;
+}
+
+.source {
+  font-size: 20px;
+}
+
+.author {
+  color: darkgray;
+  font-size: 10px;
+}
+
+</style>
+</head>
+
+<div class="titlediv">
+<h1>NYC Medallion Checker</h1>
+</div>
+
+<p>Search for an authorized NYC medallion vehicle by license plate number.</p>
+
+<body>
+	<input
+		type="text"
+		id="medallion-search"
+		placeholder="Enter a license plate number"
+	/>
+	<button type="submit" onclick="GetMedallion()">Submit</button>
+
+	<div class="result" id="medallion"></div>
+
+
+	<div class="footer">
+	  <p class="source">Information sourced from <a href="https://opendata.cityofnewyork.us/">NYC Open Data</a>.</p>
+	  <p class="author">NYC Medallion Checker site maintained by <a href="https://github.com/slizco">slizco</a>.</p>
+	</div>
+
+	<script>
+		function FmtResult() {
+			if (arguments.length < 2 ) {
+				var display = "Oops, something went wrong.";
+				display = display.fontcolor("red");
+				med.innerHTML = display;
+				med.setAttribute("class", "invalid_result")
+			}
+
+			var results = arguments[0]
+			var med = arguments[1]
+			if (results.length === 0) {
+				var display = "No medallion found."
+				display = display.fontcolor("red");
+				med.innerHTML = display;
+				med.setAttribute("class", "invalid_result")
+			} else {
+				let result = results[0]
+				console.log(result)
+				if (results[0].current_status === "CUR") {
+					var display = `Medallion is VALID.</br></br>Owner: ${result.name}</br>Agent name: ${result.agent_name}</br>Phone number: ${result.agent_telephone_number}`
+					display = display.fontcolor("darkgreen")
+					med.innerHTML = display;
+					med.setAttribute("class", "valid_result")
+				} else {
+					var display = `Medallion is EXPIRED.</br></br>Owner: ${result.name}</br>Agent name: ${result.agent_name}</br>Phone number: ${result.agent_telephone_number}`
+					display = display.fontcolor("black")
+					med.innerHTML = display;
+					med.setAttribute("class", "invalid_result")
+				}
+			}
+		}
+
+		function GetMedallion() {
+			var license_plate_number = document.getElementById("medallion-search").value.toUpperCase();
+			var xhr = new XMLHttpRequest();
+			let url = `https://data.cityofnewyork.us/resource/rhe8-mgbb.json?dmv_license_plate_number=${license_plate_number}`
+			xhr.open("GET", url);
+
+			xhr.onload = function() {
+				var results = JSON.parse(xhr.response)
+				var med = document.getElementById("medallion")
+
+				FmtResult(results, med)
+			}
+			xhr.send();
+		}
+	</script>
+
+</body>
+</html> 
